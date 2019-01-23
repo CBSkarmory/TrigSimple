@@ -3,6 +3,7 @@ package io.github.cbskarmory
 import scala.annotation.tailrec
 import scala.io.StdIn.readLine
 
+// $COVERAGE-OFF$
 object InputReader {
     def main(args: Array[String]): Unit = {
         @tailrec
@@ -16,3 +17,4 @@ object InputReader {
         readInput()
     }
 }
+// $COVERAGE_ON$
