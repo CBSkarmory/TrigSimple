@@ -18,7 +18,9 @@ object Lexer {
         case '*' :: (t: List[Char]) => TokTimes() :: tokenize(t)
         case '/' :: (t: List[Char]) => TokDiv() :: tokenize(t)
         case '(' :: (t: List[Char]) => TokLParen() :: tokenize(t)
+        case '[' :: (t: List[Char]) => TokLParen() :: tokenize(t)
         case ')' :: (t: List[Char]) => TokRParen() :: tokenize(t)
+        case ']' :: (t: List[Char]) => TokRParen() :: tokenize(t)
         case Digit(x) :: (t: List[Char]) => TokInt(x.asDigit) :: tokenize(t)
         case ' ' :: (t: List[Char]) => tokenize(t) // ignore spaces
         case (somethingElse: Char) :: (_: List[Char]) => throw new IllegalArgumentException(somethingElse.toString)
