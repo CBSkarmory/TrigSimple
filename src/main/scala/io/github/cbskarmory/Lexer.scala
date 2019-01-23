@@ -2,7 +2,7 @@ package io.github.cbskarmory
 
 object Lexer {
 
-    private val Digit = "([12])".r
+    private val Digit = "([\\d])".r
 
     def tokenize(chars: List[Char]): List[Token] = chars match {
         case Nil => List(EOF())
