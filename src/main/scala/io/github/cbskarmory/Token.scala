@@ -14,5 +14,6 @@ case class TokDiv() extends Token
 case class TokPow() extends Token
 case class TokLParen() extends Token
 case class TokRParen() extends Token
-case class TokInt(x: Int) extends Token
+
+case class TokInt(x: String) extends Token
 case class EOF() extends Token

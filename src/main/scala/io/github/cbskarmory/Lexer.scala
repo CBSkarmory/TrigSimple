@@ -21,7 +21,13 @@ object Lexer {
         case '[' :: (t: List[Char]) => TokLParen() :: tokenize(t)
         case ')' :: (t: List[Char]) => TokRParen() :: tokenize(t)
         case ']' :: (t: List[Char]) => TokRParen() :: tokenize(t)
-        case Digit(x) :: (t: List[Char]) => TokInt(x.asDigit) :: tokenize(t)
+        case Digit(x) :: (t: List[Char]) =>
+            val tokensAfter: List[Token] = tokenize(t)
+            tokensAfter match {
+                case TokInt(i) :: tail =>
+                    TokInt(x + i) /* string concatenation */ :: tail
+                case _ => TokInt(x.toString) :: tokensAfter
+            }
         case ' ' :: (t: List[Char]) => tokenize(t) // ignore spaces
         case (somethingElse: Char) :: (_: List[Char]) => throw new IllegalArgumentException(somethingElse.toString)
     }

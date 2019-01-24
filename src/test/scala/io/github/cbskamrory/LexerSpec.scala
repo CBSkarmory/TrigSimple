@@ -30,37 +30,37 @@ class LexerSpec extends FlatSpec with Matchers {
         Lexer.tokenize("]".toList) should be(List(TokRParen(), EOF()))
     }
 
-    it should "handle positive integers parsing digits into tokens" in {
-        Lexer.tokenize("1".toList) should be(List(TokInt(1), EOF()))
-        Lexer.tokenize("0".toList) should be(List(TokInt(0), EOF()))
-        Lexer.tokenize("256".toList) should be(List(TokInt(2), TokInt(5), TokInt(6), EOF()))
+    it should "handle positive integers turning them into tokens" in {
+        Lexer.tokenize("1".toList) should be(List(TokInt("1"), EOF()))
+        Lexer.tokenize("0".toList) should be(List(TokInt("0"), EOF()))
+        Lexer.tokenize("256".toList) should be(List(TokInt("256"), EOF()))
     }
 
     it should "parse consecutive phrases into the respective consecutive tokens" in {
         Lexer.tokenize("sin/cos".toList) should be(List(TokSin(), TokDiv(), TokCos(), EOF()))
         Lexer.tokenize("sin^2+cos^2".toList) should be(
-            List(TokSin(), TokPow(), TokInt(2), TokPlus(), TokCos(), TokPow(), TokInt(2), EOF())
+            List(TokSin(), TokPow(), TokInt("2"), TokPlus(), TokCos(), TokPow(), TokInt("2"), EOF())
         )
         Lexer.tokenize("sec^2-tan^2".toList) should be(
-            List(TokSec(), TokPow(), TokInt(2), TokMinus(), TokTan(), TokPow(), TokInt(2), EOF())
+            List(TokSec(), TokPow(), TokInt("2"), TokMinus(), TokTan(), TokPow(), TokInt("2"), EOF())
         )
-        Lexer.tokenize("111*2*3*4*5*6".toList) should be(
-            List(TokInt(1), TokInt(1), TokInt(1), TokTimes(), TokInt(2), TokTimes(), TokInt(3), TokTimes(),
-                TokInt(4), TokTimes(), TokInt(5), TokTimes(), TokInt(6), EOF())
+        Lexer.tokenize("123*4*5*6*7*8".toList) should be(
+            List(TokInt("123"), TokTimes(), TokInt("4"), TokTimes(), TokInt("5"), TokTimes(),
+                TokInt("6"), TokTimes(), TokInt("7"), TokTimes(), TokInt("8"), EOF())
         )
     }
 
-    it should "ignore spaces separating phrases and spaces at the start/end" in {
+    it should "ignore spaces separating phrases, numbers, and spaces at the start/end" in {
         Lexer.tokenize("sin / cos".toList) should be(List(TokSin(), TokDiv(), TokCos(), EOF()))
-        Lexer.tokenize("sin^    2 + cos      ^2".toList) should be(
-            List(TokSin(), TokPow(), TokInt(2), TokPlus(), TokCos(), TokPow(), TokInt(2), EOF())
+        Lexer.tokenize("sin^    10   2 4 + cos      ^2".toList) should be(
+            List(TokSin(), TokPow(), TokInt("1024"), TokPlus(), TokCos(), TokPow(), TokInt("2"), EOF())
         )
         Lexer.tokenize("sec^2 - tan^2".toList) should be(
-            List(TokSec(), TokPow(), TokInt(2), TokMinus(), TokTan(), TokPow(), TokInt(2), EOF())
+            List(TokSec(), TokPow(), TokInt("2"), TokMinus(), TokTan(), TokPow(), TokInt("2"), EOF())
         )
-        Lexer.tokenize("  111  * 2 *  3*4 *   5* 6   ".toList) should be(
-            List(TokInt(1), TokInt(1), TokInt(1), TokTimes(), TokInt(2), TokTimes(), TokInt(3), TokTimes(),
-                TokInt(4), TokTimes(), TokInt(5), TokTimes(), TokInt(6), EOF())
+        Lexer.tokenize("  123  * 4 *  5*6 *   7* 8   ".toList) should be(
+            List(TokInt("123"), TokTimes(), TokInt("4"), TokTimes(), TokInt("5"), TokTimes(),
+                TokInt("6"), TokTimes(), TokInt("7"), TokTimes(), TokInt("8"), EOF())
         )
     }
 
