@@ -29,7 +29,11 @@ object Lexer {
                 case _ => TokInt(x.toString) :: tokensAfter
             }
         case ' ' :: (t: List[Char]) => tokenize(t) // ignore spaces
-        case (somethingElse: Char) :: (_: List[Char]) => throw new IllegalArgumentException(somethingElse.toString)
+        case (somethingElse: Char) :: (_: List[Char]) => throw new LexError(
+            s"Malformed Input: unexpected character '${somethingElse.toString}'"
+        )
     }
 
 }
+
+class LexError(msg: String) extends InterpreterError(msg)

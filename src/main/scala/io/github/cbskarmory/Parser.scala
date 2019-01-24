@@ -15,12 +15,12 @@ object Parser {
 
     private def matchToken(toks: List[Token], tok: Token): List[Token] = toks match {
         case Nil => throw new IllegalArgumentException(
-            s"Failed to parse ${tok.getClass.getName} from empty token list"
+            s"Failed to parse ${tok.toString} from empty token list"
         )
         case `tok` :: t => t
         case h :: _ => throw new ParseError(
             s"Malformed input -- parse error: " +
-                    s"Expected ${tok.getClass.getName} from input; got ${h.getClass.getName}"
+                    s"Expected ${tok.toString} from input; got ${h.toString}"
         )
     }
 
@@ -59,16 +59,13 @@ object Parser {
     }
 
     private def parsePowerExpr(toks: List[Token]): (List[Token], Expr) = {
-        val (toks2, ex) = parsePrimaryExpr(toks)
+        val (toks2, base) = parsePrimaryExpr(toks)
         lookahead(toks2) match {
             case TokPow() =>
-                val toks3 = matchToken(toks2, TokDiv())
-                val (toks4, ex2) = parsePrimaryExpr(toks3)
-                if (!ex.isInstanceOf[IntExpr]) {
-                    throw new ParseError(s"Expression raised to non-natural power")
-                }
-                (toks4, Pow(ex, ex2.asInstanceOf[IntExpr]))
-            case _ => (toks2, ex)
+                val toks3 = matchToken(toks2, TokPow())
+                val (toks4, exponent) = parsePrimaryExpr(toks3)
+                (toks4, Pow(base, exponent))
+            case _ => (toks2, base)
         }
     }
 
@@ -83,7 +80,7 @@ object Parser {
             case TokCot() => (matchToken(toks, TokCot()), Cot())
             case EOF() => throw new ParseError("Encountered EOF token early; is the token list empty?")
             case _ =>
-                // handle end of expr automatically?
+                // handles end of expr automatically
                 val toks2 = matchToken(toks, TokLParen())
                 val (toks3, ex) = parseExprHelp(toks2)
                 val toks4 = matchToken(toks3, TokRParen())
@@ -91,10 +88,9 @@ object Parser {
         }
     }
 }
-
-class ParseError(msg: String) extends Error {
+class InterpreterError(msg: String) extends IllegalArgumentException (msg){
     val this.msg = msg
-    override def toString: String = {
-        msg + "\n" + super.toString
-    }
+    override def toString: String = msg
 }
+
+class ParseError(msg: String) extends InterpreterError(msg)

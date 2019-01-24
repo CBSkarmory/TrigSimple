@@ -6,14 +6,18 @@ import org.scalatest._
 
 
 class LexerSpec extends FlatSpec with Matchers {
-
+    
+    private val (sin_t, csc_t, cos_t, sec_t, tan_t, cot_t) = (
+            TokSin(), TokCsc(), TokCos(), TokSec(), TokTan(), TokCot()
+    )
+    
     "The Lexer" should "parse basic trig functions as the respective tokens" in {
-        tokenize("sin".toList) should be (List(TokSin(), EOF()))
-        tokenize("csc".toList) should be (List(TokCsc(), EOF()))
-        tokenize("cos".toList) should be (List(TokCos(), EOF()))
-        tokenize("sec".toList) should be (List(TokSec(), EOF()))
-        tokenize("tan".toList) should be (List(TokTan(), EOF()))
-        tokenize("cot".toList) should be (List(TokCot(), EOF()))
+        tokenize("sin".toList) should be (List(sin_t, EOF()))
+        tokenize("csc".toList) should be (List(csc_t, EOF()))
+        tokenize("cos".toList) should be (List(cos_t, EOF()))
+        tokenize("sec".toList) should be (List(sec_t, EOF()))
+        tokenize("tan".toList) should be (List(tan_t, EOF()))
+        tokenize("cot".toList) should be (List(cot_t, EOF()))
     }
 
     it should "parse basic arithmetic symbols as the respective tokens" in {
@@ -37,13 +41,19 @@ class LexerSpec extends FlatSpec with Matchers {
         tokenize("256".toList) should be(List(TokInt("256"), EOF()))
     }
 
+    it should "treat '-' as a minus sign all the time" in {
+        tokenize("-1".toList) should be (List(TokMinus(), TokInt("1"), EOF()))
+        tokenize("256 + (-101-sin)".toList) should be
+        List(TokInt("256"), TokPlus(), TokLParen(), TokMinus(), TokInt("101"), TokMinus(), sin_t, TokRParen(), EOF())
+    }
+
     it should "parse consecutive phrases into the respective consecutive tokens" in {
-        tokenize("sin/cos".toList) should be(List(TokSin(), TokDiv(), TokCos(), EOF()))
+        tokenize("sin/cos".toList) should be(List(sin_t, TokDiv(), cos_t, EOF()))
         tokenize("sin^2+cos^2".toList) should be(
-            List(TokSin(), TokPow(), TokInt("2"), TokPlus(), TokCos(), TokPow(), TokInt("2"), EOF())
+            List(sin_t, TokPow(), TokInt("2"), TokPlus(), cos_t, TokPow(), TokInt("2"), EOF())
         )
         tokenize("sec^2-tan^2".toList) should be(
-            List(TokSec(), TokPow(), TokInt("2"), TokMinus(), TokTan(), TokPow(), TokInt("2"), EOF())
+            List(sec_t, TokPow(), TokInt("2"), TokMinus(), tan_t, TokPow(), TokInt("2"), EOF())
         )
         tokenize("123*4*5*6*7*8".toList) should be(
             List(TokInt("123"), TokTimes(), TokInt("4"), TokTimes(), TokInt("5"), TokTimes(),
@@ -52,12 +62,12 @@ class LexerSpec extends FlatSpec with Matchers {
     }
 
     it should "ignore spaces separating phrases, numbers, and spaces at the start/end" in {
-        tokenize("sin / cos".toList) should be(List(TokSin(), TokDiv(), TokCos(), EOF()))
+        tokenize("sin / cos".toList) should be(List(sin_t, TokDiv(), cos_t, EOF()))
         tokenize("sin^    10   2 4 + cos      ^2".toList) should be(
-            List(TokSin(), TokPow(), TokInt("1024"), TokPlus(), TokCos(), TokPow(), TokInt("2"), EOF())
+            List(sin_t, TokPow(), TokInt("1024"), TokPlus(), cos_t, TokPow(), TokInt("2"), EOF())
         )
         tokenize("sec^2 - tan^2".toList) should be(
-            List(TokSec(), TokPow(), TokInt("2"), TokMinus(), TokTan(), TokPow(), TokInt("2"), EOF())
+            List(sec_t, TokPow(), TokInt("2"), TokMinus(), tan_t, TokPow(), TokInt("2"), EOF())
         )
         tokenize("  123  * 4 *  5*6 *   7* 8   ".toList) should be(
             List(TokInt("123"), TokTimes(), TokInt("4"), TokTimes(), TokInt("5"), TokTimes(),
