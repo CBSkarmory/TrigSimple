@@ -7,17 +7,24 @@ object Parser {
         case _ => throw new ParseError("No lookahead")
     }
 
+    def parseExpr(toks: List[Token]): Expr = {
+        val (toks2, ex) = parseExprHelp(toks)
+        matchToken(toks2, EOF())
+        ex
+    }
+
     private def matchToken(toks: List[Token], tok: Token): List[Token] = toks match {
         case Nil => throw new IllegalArgumentException(
             s"Failed to parse ${tok.getClass.getName} from empty token list"
         )
         case `tok` :: t => t
-        case h :: _ => throw new IllegalArgumentException(
-            s"Expected ${tok.getClass.getName} from input; got ${h.getClass.getName}"
+        case h :: _ => throw new ParseError(
+            s"Malformed input -- parse error: " +
+                    s"Expected ${tok.getClass.getName} from input; got ${h.getClass.getName}"
         )
     }
 
-    def parseExpr(toks: List[Token]): (List[Token], Expr) = {
+    private def parseExprHelp(toks: List[Token]): (List[Token], Expr) = {
         parseAdditiveExpr(toks)
     }
 
@@ -37,15 +44,51 @@ object Parser {
     }
 
     private def parseMultiplicativeExpr(toks: List[Token]): (List[Token], Expr) = {
-        throw new NotImplementedError()
+        val (toks2, ex) = parsePowerExpr(toks)
+        lookahead(toks2) match {
+            case TokTimes() =>
+                val toks3 = matchToken(toks2, TokTimes())
+                val (toks4, ex2) = parseMultiplicativeExpr(toks3)
+                (toks4, Mult(ex, ex2))
+            case TokDiv() =>
+                val toks3 = matchToken(toks2, TokDiv())
+                val (toks4, ex2) = parseMultiplicativeExpr(toks3)
+                (toks4, Div(ex, ex2))
+            case _ => (toks2, ex)
+        }
     }
 
     private def parsePowerExpr(toks: List[Token]): (List[Token], Expr) = {
-        throw new NotImplementedError()
+        val (toks2, ex) = parsePrimaryExpr(toks)
+        lookahead(toks2) match {
+            case TokPow() =>
+                val toks3 = matchToken(toks2, TokDiv())
+                val (toks4, ex2) = parsePrimaryExpr(toks3)
+                if (!ex.isInstanceOf[IntExpr]) {
+                    throw new ParseError(s"Expression raised to non-natural power")
+                }
+                (toks4, Pow(ex, ex2.asInstanceOf[IntExpr]))
+            case _ => (toks2, ex)
+        }
     }
 
     private def parsePrimaryExpr(toks: List[Token]): (List[Token], Expr) = {
-        throw new NotImplementedError()
+        lookahead(toks) match {
+            case TokInt(s) => (matchToken(toks, TokInt(s)), IntExpr(s.toInt))
+            case TokSin() => (matchToken(toks, TokSin()), Sin())
+            case TokCsc() => (matchToken(toks, TokCsc()), Csc())
+            case TokCos() => (matchToken(toks, TokCos()), Cos())
+            case TokSec() => (matchToken(toks, TokSec()), Sec())
+            case TokTan() => (matchToken(toks, TokTan()), Tan())
+            case TokCot() => (matchToken(toks, TokCot()), Cot())
+            case EOF() => throw new ParseError("Encountered EOF token early; is the token list empty?")
+            case _ =>
+                // handle end of expr automatically?
+                val toks2 = matchToken(toks, TokLParen())
+                val (toks3, ex) = parseExprHelp(toks2)
+                val toks4 = matchToken(toks3, TokRParen())
+                (toks4, ex)
+        }
     }
 }
 
