@@ -63,7 +63,7 @@ object Parser {
         lookahead(toks2) match {
             case TokPow() =>
                 val toks3 = matchToken(toks2, TokPow())
-                val (toks4, exponent) = parsePrimaryExpr(toks3)
+                val (toks4, exponent) = parsePowerExpr(toks3)
                 (toks4, Pow(base, exponent))
             case _ => (toks2, base)
         }
