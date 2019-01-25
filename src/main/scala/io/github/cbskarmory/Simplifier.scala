@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor
 
 import scala.collection.mutable
 
+
 class Simplifier(core: Expr,
                  transforms: Vector[Expr => Option[Expr]] = Rules.transforms,
                  targets: scala.collection.immutable.Set[Expr] = Rules.targets) {
@@ -12,25 +13,40 @@ class Simplifier(core: Expr,
     val toCheck = new mutable.Queue[Expr]()
     val this.transforms = transforms
 
-    def explore(): Option[Expr] = {
+    def getSimplified: Option[Expr] = this.ans
+    def getWork: Option[Vector[Expr]] = this.path
+
+    private def explore(): (Option[Expr], Option[Vector[Expr]]) = {
+        val parent : mutable.HashMap[Expr,Expr]= mutable.HashMap()
+        val level : mutable.HashMap[Expr, Int] = mutable.HashMap(core -> 0)
         toCheck.enqueue(core)
         while (toCheck.nonEmpty) {
             val curr = toCheck.dequeue()
             if (!seen.contains(curr)) {
                 seen.add(curr)
                 if (targets.contains(curr)) {
-                    return Some(curr)
+                    var trace = Vector(curr)
+                    var ptr = curr
+                    while (parent contains ptr) {
+                        ptr = parent(ptr)
+                         trace :+= ptr
+                    }
+                    return (Some(curr), Some(trace.reverse))
                 }
-                genAdj(curr).foreach(v => toCheck.enqueue(v))
+                (genAdj(curr) -- level.keySet).foreach(v => {
+                    toCheck.enqueue(v)
+                    parent(v) = curr
+                    level(v) = level(parent(v)) + 1
+                })
             }
             // go to next iteration
         }
-        None // not found
+        (None, None)// not found
     }
+    private val (ans, path) = explore()
 
     private def genAdj(ex: Expr): Set[Expr] = {
         (genDirectTransforms(ex) | genRecTransforms(ex)) -- seen
-
     }
 
     private def genDirectTransforms(ex: Expr): Set[Expr] = {
@@ -55,5 +71,4 @@ class Simplifier(core: Expr,
         val withRightChanged: Set[Expr] = for {tr2 <- subTr2} yield constructor.newInstance(ex1, tr2)
         withLeftChanged | withRightChanged
     }
-
 }

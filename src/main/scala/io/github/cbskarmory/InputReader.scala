@@ -10,23 +10,31 @@ import scala.io.StdIn.readLine
 object InputReader {
     def main(args: Array[String]): Unit = {
 
+        println("Type 'exit' to exit or an expression to simplify")
+
         @tailrec
         def readInput(): Unit = {
             val ln = readLine().toLowerCase()
-            //handle input
+            if (ln == "exit") {
+                return
+            }
             try {
                 val exp = parseExpr(tokenize(ln.toList))
                 val simplifier = new Simplifier(exp)
-                val ans = simplifier.explore() match {
+                val ans = simplifier.getSimplified match {
                     case None => "unknown"
-                    case Some(ex) => ex.toString
+                    case Some(ex) => ex.toString + "\n"
                 }
-                println(ans)
+                val path = simplifier.getWork match {
+                    case None => ""
+                    case Some(p) => p.toString()
+                }
+                println(ans + path)
 
             } catch {
                 case e: InterpreterError => println(e.toString)
             }
-            if (ln == null || ln.isEmpty) () else readInput()
+            readInput()
         }
         readInput()
     }
