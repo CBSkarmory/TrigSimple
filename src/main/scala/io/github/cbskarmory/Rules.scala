@@ -8,6 +8,12 @@ object Rules {
     private val (one, two) = (IntExpr(1), IntExpr(2))
     private val basicFns = Vector(sin, csc, cos, sec, tan, cot)
 
+    var targets : Set[Expr] = new HashSet[Expr]
+    targets ++= basicFns
+    targets ++= basicFns.map(Pow(_,two))
+    targets ++= basicFns.map(Mult(_,two))
+    targets ++= (0 until 32).map(IntExpr)
+
     var transforms: Vector[Expr => Option[Expr]] = Vector()
 
     // commutativity of addition
@@ -49,9 +55,4 @@ object Rules {
         case _ => None
     }}
 
-    var targets : Set[Expr] = new HashSet[Expr]
-    targets ++= basicFns
-    targets ++= basicFns.map(Pow(_,two))
-    targets ++= basicFns.map(Mult(_,two))
-    targets ++= (1 until 16).map(IntExpr)
 }
