@@ -12,7 +12,7 @@ object Rules {
     targets ++= basicFns
     targets ++= basicFns.map(Pow(_,two))
     targets ++= basicFns.map(Mult(_,two))
-    targets ++= (0 until 32).map(IntExpr)
+    targets ++= (0 until 65).map(IntExpr)
 
     var transforms: Vector[Expr => Option[Expr]] = Vector()
 
@@ -46,6 +46,11 @@ object Rules {
     // multiply two ints
     transforms :+= {x: Expr => x match {
         case Mult(IntExpr(a), IntExpr(b)) => Some(IntExpr(a * b))
+        case _ => None
+    }}
+    // subtract two ints
+    transforms :+= {x: Expr => x match {
+        case Sub(IntExpr(l), IntExpr(r)) => Some(IntExpr(l - r))
         case _ => None
     }}
 

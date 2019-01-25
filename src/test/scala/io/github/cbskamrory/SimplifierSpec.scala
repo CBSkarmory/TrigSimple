@@ -17,15 +17,17 @@ class SimplifierSpec extends FlatSpec with Matchers {
         new Simplifier(Add(Pow(sin,IntExpr(999)), Pow(cos,two))).explore() should be (None)
     }
 
-    it should "be able evaluate addition and multiplication of ints (single level)" in {
+    it should "be able evaluate +, *, and - of ints (single level, positive int result)" in {
         new Simplifier(Add(one, one)).explore() should be (Some(two))
         new Simplifier(Mult(one, one)).explore() should be (Some(one))
+        new Simplifier(Sub(two, one)).explore() should be (Some(one))
+
     }
 
     it should "be able evaluate addition and multiplication of ints (nested)" in {
         new Simplifier(Mult(two, Add(one, one))).explore() should be (Some(IntExpr(4)))
-        new Simplifier(Add(one, Add(one,Add(one,Add(one, one))))) should be (Some(IntExpr(5)))
-        new Simplifier(Add(two, Mult(two,Mult(two,Mult(two, two))))) should be (Some(IntExpr(32)))
+        new Simplifier(Add(one, Add(one,Add(one,Add(one, one))))).explore() should be (Some(IntExpr(5)))
+        new Simplifier(Mult(two, Mult(two,Mult(two,Mult(two, two))))).explore() should be (Some(IntExpr(32)))
     }
 
     it should "use commutativity of addition" in {
