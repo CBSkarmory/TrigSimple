@@ -1,7 +1,9 @@
 package io.github.cbskarmory
 
 sealed abstract class Expr
-case class IntExpr(x: Int) extends Expr
+case class IntExpr(x: Int) extends Expr {
+    override def toString: String = x.toString
+}
 case class Add(a: Expr, b: Expr) extends Expr
 case class Sub(l: Expr, r: Expr) extends Expr
 case class Mult(a: Expr, b: Expr) extends Expr
