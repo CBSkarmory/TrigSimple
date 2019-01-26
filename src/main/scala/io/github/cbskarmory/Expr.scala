@@ -26,7 +26,7 @@ case class Add(a: Expr, b: Expr) extends Expr {
     private var cachedHC = 0
     override def toString: String = s"(${a.toString} + ${b.toString})"
 
-    override def depth: Int = max(a.depth, b.depth)
+    override def depth: Int = max(a.depth, b.depth) + 1
 
     override def hashCode(): Int = {
         if (0 == cachedHC) {
@@ -39,7 +39,7 @@ case class Add(a: Expr, b: Expr) extends Expr {
     }
 }
 case class Sub(l: Expr, r: Expr) extends Expr{
-    override def depth: Int = max(l.depth, r.depth)
+    override def depth: Int = max(l.depth, r.depth) + 1
     override def toString: String = s"(${l.toString} - ${r.toString})"
     override def hashCode(): Int = l.hashCode() - r.hashCode()
     override def equals(o: Any): Boolean = {
@@ -50,7 +50,7 @@ case class Mult(a: Expr, b: Expr) extends Expr {
     private var cachedHC = 0
     override def toString: String = s"(${a.toString} * ${b.toString})"
 
-    override def depth: Int = max(a.depth, b.depth)
+    override def depth: Int = max(a.depth, b.depth) + 1
 
     override def hashCode(): Int = {
         if (0 == cachedHC) {
@@ -64,7 +64,7 @@ case class Mult(a: Expr, b: Expr) extends Expr {
     }
 }
 case class Div(top: Expr, bot: Expr) extends Expr {
-    override def depth: Int = max(top.depth, bot.depth)
+    override def depth: Int = max(top.depth, bot.depth) + 1
     override def toString: String = s"(${top.toString} / ${bot.toString})"
     override def hashCode(): Int = top.hashCode() ^ bot.hashCode()
     override def equals(o: Any): Boolean = {
@@ -72,7 +72,7 @@ case class Div(top: Expr, bot: Expr) extends Expr {
     }
 }
 case class Pow(base: Expr, pow: Expr) extends Expr {
-    override def depth: Int = max(base.depth, pow.depth)
+    override def depth: Int = max(base.depth, pow.depth) + 1
     override def toString: String = s"(${base.toString}^${pow.toString})"
     override def hashCode(): Int = ~(base.hashCode() ^ pow.hashCode())
     override def equals(o: Any): Boolean = {

@@ -26,13 +26,15 @@ object Rules {
         case Mult(a,b) => Some(Mult(b,a))
         case _ => None
     }}
-    // Associativity of addition: (a + b) + c = a + (b + c)
+    // Associativity of addition: (a + b) + c = a + (b + c); (a + b) - c = a + (b - c)
     transforms :+= {x: Expr => x match {
         case Add(Add(a,b),c) => Some(Add(a,Add(b,c)))
+        case Sub(Add(a,b),c) => Some(Add(a,Sub(b,c)))
         case Add(a,Add(b,c)) => Some(Add(Add(a,b),c))
+        case Add(a,Sub(b,c)) => Some(Sub(Add(a,b),c))
         case _ => None
     }}
-    // Associativity of multiplication: (a * b) * c = a * (b * c)
+        // Associativity of multiplication: (a * b) * c = a * (b * c)
     transforms :+= {x: Expr => x match {
         case Mult(Mult(a,b),c) => Some(Mult(a,Mult(b,c)))
         case Mult(a,Mult(b,c)) => Some(Mult(Mult(a,b),c))
@@ -40,8 +42,8 @@ object Rules {
     }}
     // multiplication distributes over addition: a(x + y) = (a*x) + (a*y)
     transforms :+= {x: Expr => x match {
-        case Mult(IntExpr(a), Add(e1, e2)) => Some(Add(Mult(IntExpr(a), e1), Mult(IntExpr(a), e2)))
-        case Add(Mult(IntExpr(a), e1), Mult(IntExpr(b), e2)) if a == b => Some(Mult(IntExpr(a), Add(e1, e2)))
+        case Mult(a, Add(e1, e2)) => Some(Add(Mult(a, e1), Mult(a, e2)))
+        case Add(Mult(a, e1), Mult(b, e2)) if a == b => Some(Mult(a, Add(e1, e2)))
         case _ => None
     }}
     // Additive Identity
@@ -67,6 +69,7 @@ object Rules {
     // Multiplicative Identity
     transforms :+= {x: Expr => x match {
         case Mult(`one`, ex) => Some(ex)
+        case Mult(ex, `one`) => Some(ex)
         case _ => None
     }}
     // Multiplicative Inverse
@@ -87,14 +90,18 @@ object Rules {
 
     // x + x = 2x
     transforms :+= {x: Expr => x match {
+        case Mult(IntExpr(_), IntExpr(_)) => None
         case Mult(`two`, e) => Some(Add(e,e))
+        case Add(IntExpr(_), IntExpr(_)) => None
         case Add(a,b) if a == b => Some(Mult(`two`, a))
         case _ => None
     }}
 
     // x * x = x^2
     transforms :+= {x: Expr => x match {
+        case Pow(IntExpr(_), IntExpr(_)) => None
         case Pow(e, `two`) => Some(Mult(e,e))
+        case Mult(IntExpr(_), IntExpr(_)) => None
         case Mult(a,b) if a == b => Some(Pow(a, `two`))
         case _ => None
     }}
@@ -109,6 +116,24 @@ object Rules {
         case _ => None
     }}
 
+    // (x/a) / b = (x / (ab))
+    transforms :+= {x: Expr => x match {
+        case Div(Div(ex, a), b) => Some(Div(ex,Mult(a, b)))
+        case _ => None
+    }}
+
+    // (a / b) / a = 1/b
+    transforms :+= { x: Expr => x match {
+        case Div(Div(a,b),c) if a == c => Some(Div(`one`, b))
+        case _ => None
+    }}
+
+    // 1 / (fn^k) = (1 / fn) ^ k
+    transforms :+= {x: Expr => x match {
+        case Div(`one`, Pow(ex, IntExpr(k))) => Some(Pow(Div(`one`, ex), IntExpr(k)))
+        case _ => None
+    }}
+
     // (x - y) = -(y - x)
     // a(x - y) = -a(y - x)
     transforms :+= {x: Expr => x match {
@@ -117,6 +142,7 @@ object Rules {
         case Mult(IntExpr(a), Sub(e1, e2)) => Some(Mult(IntExpr(-a), Sub(e2, e1)))
         case _ => None
     }}
+
     // a / (x / y) = (ay / x)
     transforms :+= {x: Expr => x match {
         case Div(numerator, Div(a, b)) => Some(Div(Mult(numerator, b),a))
@@ -129,6 +155,16 @@ object Rules {
     transforms :+= {x: Expr => x match {
         case Mult(Div(num1, den1), Div(num2, den2)) => Some(Div(Mult(num1, num2), Mult(den1, den2)))
         case Mult(ex1, Div(num, den)) => Some(Div(Mult(ex1, num), den))
+        case _ => None
+    }}
+    // adding fractions
+    transforms :+= {x: Expr => x match {
+        case Add(Div(a, bot1), Div(b, bot2)) if bot1 == bot2 => Some(Div(Add(a, b), bot1)) // same denominator
+        case _ => None
+    }}
+    // adding frac to non-frac
+    transforms :+= {x: Expr => x match {
+        case Add(Div(a, bot), b) => Some(Div(Add(a, Mult(bot, b)), bot)) // make denominator same
         case _ => None
     }}
 
@@ -178,4 +214,5 @@ object Rules {
         case `cot` => Some(Div(`one`,`tan`))
         case _ => None
     }}
+
 }

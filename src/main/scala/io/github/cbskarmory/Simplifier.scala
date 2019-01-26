@@ -11,7 +11,10 @@ class Simplifier(core: Expr,
                  targets: scala.collection.immutable.Set[Expr] = Rules.targets) {
 
     val seen = new mutable.HashSet[Expr]()
-    val toCheck = new mutable.Queue[Expr]()
+    private def cmp(tup: (Int, Expr)): Int= {
+        -tup._1
+    }
+    private val toCheck : mutable.PriorityQueue[(Int, Expr)]= mutable.PriorityQueue.empty(Ordering.by(cmp))
     val this.transforms = transforms
 
     def getSimplified: Option[Expr] = this.ans
@@ -19,18 +22,18 @@ class Simplifier(core: Expr,
 
     var checks = 0
     var skips = 0
-    var maxDepth = core.depth
+    var maxDepth: Int = core.depth
 
     private def explore(): (Option[Expr], Option[Vector[Expr]]) = {
         val parent : mutable.HashMap[Expr,Expr]= mutable.HashMap()
         val level : mutable.HashMap[Expr, Int] = mutable.HashMap(core -> 0)
-        toCheck.enqueue(core)
+        toCheck.enqueue((core.depth, core))
         while (toCheck.nonEmpty) {
-            val curr = toCheck.dequeue()
-            checks += 1 // TODO
-            if (!seen.contains(curr)) {
+            val curr = toCheck.dequeue()._2
+            checks += 1
+            //if (!seen.contains(curr)) {
                 seen.add(curr)
-                maxDepth = if (maxDepth >= curr.depth) maxDepth else {println(s"md: ${curr.depth}"); curr.depth} // TODO
+                maxDepth = if (maxDepth >= curr.depth) maxDepth else curr.depth
 
                 if (targets.contains(curr) || curr.isInstanceOf[IntExpr]) {
                     var trace = Vector(curr)
@@ -41,25 +44,23 @@ class Simplifier(core: Expr,
                     }
                     return (Some(curr), Some(trace.reverse))
                 }
-                (genAdj(curr) -- level.keySet).foreach(v => {
-                    toCheck.enqueue(v)
-                    parent(v) = curr
-                    level(v) = level(parent(v)) + 1
+                val nextLevel = level(curr) + 1
+                genAdj(curr).foreach(v => {
+                    if (v.depth >= 10 || (level.keySet contains v)) {
+                        skips += 1
+                    } else {
+                        toCheck.enqueue((v.depth * 3 + nextLevel * 2, v))
+                        parent(v) = curr
+                        level(v) = nextLevel
+                    }
                 })
-            } else {
-                skips += 1 // TODO
-            }
+            //}
             // go to next iteration
 
         }
         (None, None)// not found
     }
     private val (ans, path) = explore()
-    if (true) {
-        println(s"$checks checks")
-        println(s"$skips skips")
-        //println(s"${seen.size} seen")
-    }
 
     private def genAdj(ex: Expr): Set[Expr] = {
         genDirectTransforms(ex) | genRecTransforms(ex)

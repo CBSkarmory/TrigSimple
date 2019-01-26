@@ -28,7 +28,6 @@ class SimplifierSpec extends FlatSpec with Matchers {
     it should "be able evaluate addition and multiplication of ints (nested)" in {
         new Simplifier(Mult(two, Add(one, one))).getSimplified should be (Some(IntExpr(4)))
         new Simplifier(Add(one, Add(one,Add(one,Add(one, one))))).getSimplified should be (Some(IntExpr(5)))
-        // TODO this takes a while to run
         new Simplifier(Mult(two, Mult(two,Mult(two,Mult(two, two))))).getSimplified should be (Some(IntExpr(32)))
     }
 
@@ -73,6 +72,11 @@ class SimplifierSpec extends FlatSpec with Matchers {
         new Simplifier(Mult(Div(sin, cos), Div(cos, sin))).getSimplified should be (Some(one))
         new Simplifier(Mult(Div(three, two), Div(two, three))).getSimplified should be (Some(one))
         new Simplifier(Mult(Div(sec, tan), Div(tan, sec))).getSimplified should be (Some(one))
+    }
+
+    it should "handle moderately complex identities on its own" in {
+        new Simplifier(Add(Mult(tan, sin), cos)).getSimplified should be (Some(sec))
+        new Simplifier(Add(Pow(tan, two), one)).getSimplified should be (Some(Pow(sec,two)))
     }
 
     it should "simplify with as few steps as possible" in {

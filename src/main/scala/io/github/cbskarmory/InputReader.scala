@@ -25,6 +25,10 @@ object InputReader {
                     case None => "unknown"
                     case Some(p) => p.map(_.toString).reduce((a,b) => a + "\n" + b)
                 }
+                println(s"${simplifier.checks} checks")
+                println(s"${simplifier.skips} skips")
+                println(s"max depth: ${simplifier.maxDepth}")
+                println(s"${simplifier.getWork.getOrElse(Vector()).size} steps")
                 println(path)
 
             } catch {
