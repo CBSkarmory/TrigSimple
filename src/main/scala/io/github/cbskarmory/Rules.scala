@@ -30,11 +30,27 @@ object Rules {
     // associativity of addition
     transforms :+= {x: Expr => x match {
         case Add(Add(a,b),c) => Some(Add(a,Add(b,c)))
+        case Add(a,Add(b,c)) => Some(Add(Add(a,b),c))
         case _ => None
     }}
     // associativity of multiplication
     transforms :+= {x: Expr => x match {
         case Mult(Mult(a,b),c) => Some(Mult(a,Mult(b,c)))
+        case Mult(a,Mult(b,c)) => Some(Mult(Mult(a,b),c))
+        case _ => None
+    }}
+
+    // x + x = 2x
+    transforms :+= {x: Expr => x match {
+        case Mult(`two`, e) => Some(Add(e,e))
+        case Add(a,b) if a == b => Some(Mult(`two`, a))
+        case _ => None
+    }}
+
+    // x * x = x^2
+    transforms :+= {x: Expr => x match {
+        case Pow(e, `two`) => Some(Mult(e,e))
+        case Mult(a,b) if a == b => Some(Pow(a, `two`))
         case _ => None
     }}
 
@@ -57,6 +73,13 @@ object Rules {
     // sin^2 + cos^2 = 1
     transforms :+= {x: Expr => x match {
         case Add(Pow(`sin`,`two`), Pow(`cos`,`two`)) => Some(one)
+        case _ => None
+    }}
+
+    // sin / cos = tan
+    transforms :+= {x: Expr => x match {
+        case Div(`sin`,`cos`) => Some(`tan`)
+        case `tan` => Some(Div(`sin`,`cos`))
         case _ => None
     }}
 

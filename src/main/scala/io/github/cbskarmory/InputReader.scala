@@ -21,15 +21,11 @@ object InputReader {
             try {
                 val exp = parseExpr(tokenize(ln.toList))
                 val simplifier = new Simplifier(exp)
-                val ans = simplifier.getSimplified match {
-                    case None => "unknown"
-                    case Some(ex) => ex.toString + "\n"
-                }
                 val path = simplifier.getWork match {
-                    case None => ""
-                    case Some(p) => p.toString()
+                    case None => "unknown"
+                    case Some(p) => p.map(_.toString).reduce((a,b) => a + "\n" + b)
                 }
-                println(ans + path)
+                println(path)
 
             } catch {
                 case e: InterpreterError => println(e.toString)

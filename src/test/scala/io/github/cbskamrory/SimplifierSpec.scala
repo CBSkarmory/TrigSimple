@@ -11,9 +11,10 @@ class SimplifierSpec extends FlatSpec with Matchers {
     
     "A Simplifier" should "find an equivalent version for verbatim identities" in {
         new Simplifier(Add(Pow(sin,two), Pow(cos,two))).getSimplified should be (Some(one))
+        new Simplifier(Div(sin, cos)).getSimplified should be (Some(tan))
     }
 
-    it should "have explore() return None for things have no simpler form found" in {
+    it should "have getSimplified return None for things have no simpler form found" in {
         new Simplifier(Add(Pow(sin,IntExpr(999)), Pow(cos,two))).getSimplified should be (None)
     }
 
@@ -21,7 +22,6 @@ class SimplifierSpec extends FlatSpec with Matchers {
         new Simplifier(Add(one, one)).getSimplified should be (Some(two))
         new Simplifier(Mult(one, one)).getSimplified should be (Some(one))
         new Simplifier(Sub(two, one)).getSimplified should be (Some(one))
-
     }
 
     it should "be able evaluate addition and multiplication of ints (nested)" in {
@@ -36,6 +36,15 @@ class SimplifierSpec extends FlatSpec with Matchers {
 
     it should "use associativity of addition" in {
         new Simplifier(Add(Pow(sin,two), Add(Pow(cos,two), one))).getSimplified should be (Some(two))
+    }
+
+    it should "be able to add 2 of the same trig function into 2 * that function" in {
+        new Simplifier(Add(sin,sin)).getSimplified should be (Some(Mult(sin, two)))
+        new Simplifier(Add(csc,csc)).getSimplified should be (Some(Mult(csc, two)))
+        new Simplifier(Add(cos,cos)).getSimplified should be (Some(Mult(cos, two)))
+        new Simplifier(Add(sec,sec)).getSimplified should be (Some(Mult(sec, two)))
+        new Simplifier(Add(tan,tan)).getSimplified should be (Some(Mult(tan, two)))
+        new Simplifier(Add(cot,cot)).getSimplified should be (Some(Mult(cot, two)))
     }
 
     it should "simplify with as few steps as possible" in {
