@@ -1,6 +1,6 @@
 # TrigSimple
-[![Build Status](https://travis-ci.org/CBSkarmory/trig_simplify.png)](https://travis-ci.org/CBSkarmory/trig_simplify)
-[![codecov](https://codecov.io/gh/CBSkarmory/trig_simplify/branch/master/graph/badge.svg)](https://codecov.io/gh/CBSkarmory/trig_simplify)
+[![Build Status](https://travis-ci.org/CBSkarmory/TrigSimple.png)](https://travis-ci.org/CBSkarmory/TrigSimple)
+[![codecov](https://codecov.io/gh/CBSkarmory/TrigSimple/branch/master/graph/badge.svg)](https://codecov.io/gh/CBSkarmory/TrigSimple)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 Simplifies trigonometric expressions automatically with state space search AI
