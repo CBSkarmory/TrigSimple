@@ -10,9 +10,11 @@ object Rules {
 
     var targets : Set[Expr] = new HashSet[Expr]
     targets ++= basicFns
-    targets ++= basicFns.map(Pow(_,two)) // f^2
-    targets ++= basicFns.map(Mult(two,_)) // 2f
-    //targets ++= (-64 until 65).map(IntExpr)
+    targets ++= basicFns.map(Pow(_,two))    // f^2
+    targets ++= basicFns.map(Pow(_,three))  // f^3
+    targets ++= basicFns.map(Mult(two,_))   // 2f
+    targets ++= basicFns.map(Mult(three,_)) // 3f
+    targets ++= basicFns.map(Mult(four,_))  // 4f
 
     var transforms: Vector[Expr => Option[Expr]] = Vector()
 
@@ -34,16 +36,10 @@ object Rules {
         case Add(a,Sub(b,c)) => Some(Sub(Add(a,b),c))
         case _ => None
     }}
-        // Associativity of multiplication: (a * b) * c = a * (b * c)
+    // Associativity of multiplication: (a * b) * c = a * (b * c)`
     transforms :+= {x: Expr => x match {
         case Mult(Mult(a,b),c) => Some(Mult(a,Mult(b,c)))
         case Mult(a,Mult(b,c)) => Some(Mult(Mult(a,b),c))
-        case _ => None
-    }}
-    // multiplication distributes over addition: a(x + y) = (a*x) + (a*y)
-    transforms :+= {x: Expr => x match {
-        case Mult(a, Add(e1, e2)) => Some(Add(Mult(a, e1), Mult(a, e2)))
-        case Add(Mult(a, e1), Mult(b, e2)) if a == b => Some(Mult(a, Add(e1, e2)))
         case _ => None
     }}
     // Additive Identity
@@ -87,6 +83,25 @@ object Rules {
         case Div(ex1, ex2) if ex1 == ex2=> Some(one)
         case _ => None
     }}
+    // multiplication distributes over addition: a(x + y) = (a*x) + (a*y)
+    transforms :+= {x: Expr => x match {
+        case Mult(a, Add(e1, e2)) => Some(Add(Mult(a, e1), Mult(a, e2)))
+        case Add(Mult(a, e1), Mult(b, e2)) if a == b => Some(Mult(a, Add(e1, e2)))
+        case _ => None
+    }}
+    // basic factoring
+    transforms :+= {x: Expr => x match {
+        case Add(ex1, Mult(ex2, otherEx)) if ex1 == ex2 => Some(Mult(ex1, Add(one, otherEx)))
+        case Sub(ex1, Mult(ex2, otherEx)) if ex1 == ex2 => Some(Mult(ex1, Sub(one, otherEx)))
+        case _ => None
+    }}
+
+    // a(a^k) = a^(k+1)
+    transforms :+= {x: Expr => x match {
+        case Mult(ex1, Pow(ex2, IntExpr(k))) if ex1 == ex2 && k < 8 => Some(Pow(ex2, IntExpr(k + 1)))
+        case Pow(ex, IntExpr(k)) if 1 < k && k < 9 => Some(Mult(ex, Pow(ex, IntExpr(k - 1))))
+        case _ => None
+    }}
 
     // x + x = 2x
     transforms :+= {x: Expr => x match {
@@ -103,6 +118,13 @@ object Rules {
         case Pow(e, `two`) => Some(Mult(e,e))
         case Mult(IntExpr(_), IntExpr(_)) => None
         case Mult(a,b) if a == b => Some(Pow(a, `two`))
+        case _ => None
+    }}
+
+    // (a/b)^k = (a^k) / (b^k)
+    transforms :+= {x: Expr => x match  {
+        case Pow(Div(a,b), IntExpr(k)) => Some(Div(Pow(a,IntExpr(k)), Pow(b,IntExpr(k))))
+        case Div(Pow(a,IntExpr(k)), Pow(b,IntExpr(j))) if j == k => Some(Pow(Div(a,b), IntExpr(k)))
         case _ => None
     }}
 
@@ -162,9 +184,14 @@ object Rules {
         case Add(Div(a, bot1), Div(b, bot2)) if bot1 == bot2 => Some(Div(Add(a, b), bot1)) // same denominator
         case _ => None
     }}
-    // adding frac to non-frac
+    // adding frac to non-frac: (a/y) + b = (a + (yb)) / y
     transforms :+= {x: Expr => x match {
         case Add(Div(a, bot), b) => Some(Div(Add(a, Mult(bot, b)), bot)) // make denominator same
+        case _ => None
+    }}
+    // adding frac to 1: (a/b) + 1 = (a/b) + (b/b)
+    transforms :+= {x: Expr => x match {
+        case Add(Div(a,b), `one`) => Some(Add(Div(a,b), Div(b,b)))
         case _ => None
     }}
 
@@ -187,6 +214,8 @@ object Rules {
     // sin^2 + cos^2 = 1
     transforms :+= {x: Expr => x match {
         case Add(Pow(`sin`,`two`), Pow(`cos`,`two`)) => Some(one)
+        case Sub(`one`, Pow(`sin`, `two`)) => Some(Pow(cos, two))
+        case Sub(`one`, Pow(`cos`, `two`)) => Some(Pow(sin, two))
         case _ => None
     }}
 

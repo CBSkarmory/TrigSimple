@@ -1,6 +1,6 @@
 name := "trig_simplify"
 
-version := "0.1"
+version := "v0.2-beta"
 
 scalaVersion := "2.12.8"
 

@@ -74,9 +74,17 @@ class SimplifierSpec extends FlatSpec with Matchers {
         new Simplifier(Mult(Div(sec, tan), Div(tan, sec))).getSimplified should be (Some(one))
     }
 
-    it should "handle moderately complex identities on its own" in {
+    it should "be able to handle basic factoring and exponents (low powers)" in {
+        new Simplifier(Sub(sin, Mult(sin, Pow(cos, two)))).getSimplified should be (Some(Pow(sin, three)))
+    }
+
+    it should "handle simple identities on its own" in {
         new Simplifier(Add(Mult(tan, sin), cos)).getSimplified should be (Some(sec))
         new Simplifier(Add(Pow(tan, two), one)).getSimplified should be (Some(Pow(sec,two)))
+    }
+
+    it should "handle moderately complex identities on its own" in {
+        new Simplifier(Div(Pow(tan, two), Add(Pow(tan, two), one))).getSimplified should be (Some(Pow(sin, two)))
     }
 
     it should "simplify with as few steps as possible" in {

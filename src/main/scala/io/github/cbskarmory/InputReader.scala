@@ -10,7 +10,7 @@ import scala.io.StdIn.readLine
 object InputReader {
     def main(args: Array[String]): Unit = {
 
-        println("Type 'exit' to exit or an expression to simplify")
+        println("Type 'exit' to exit or an expression to simplify. Ctrl-C to cancel")
 
         @tailrec
         def readInput(): Unit = {
@@ -25,10 +25,10 @@ object InputReader {
                     case None => "unknown"
                     case Some(p) => p.map(_.toString).reduce((a,b) => a + "\n" + b)
                 }
-                println(s"${simplifier.checks} checks")
-                println(s"${simplifier.skips} skips")
-                println(s"max depth: ${simplifier.maxDepth}")
-                println(s"${simplifier.getWork.getOrElse(Vector()).size} steps")
+                println(s"${simplifier.checks} nodes explored")
+                //println(s"${simplifier.skips} skips")
+                //println(s"max depth: ${simplifier.maxDepth}")
+                println(s"${simplifier.getWork.getOrElse(Vector()).size} steps\n--------")
                 println(path)
 
             } catch {

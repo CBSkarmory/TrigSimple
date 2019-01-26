@@ -10,10 +10,11 @@ class Simplifier(core: Expr,
                  transforms: Vector[Expr => Option[Expr]] = Rules.transforms,
                  targets: scala.collection.immutable.Set[Expr] = Rules.targets) {
 
+    val DEFAULT_EXPLORATION_LIMIT: Int = 5e4.asInstanceOf[Int]
+    val DEFAULT_MAX_DEPTH: Int = 16
+
     val seen = new mutable.HashSet[Expr]()
-    private def cmp(tup: (Int, Expr)): Int= {
-        -tup._1
-    }
+    private def cmp(tup: (Int, Expr)): Int = {-tup._1}
     private val toCheck : mutable.PriorityQueue[(Int, Expr)]= mutable.PriorityQueue.empty(Ordering.by(cmp))
     val this.transforms = transforms
 
@@ -24,13 +25,17 @@ class Simplifier(core: Expr,
     var skips = 0
     var maxDepth: Int = core.depth
 
-    private def explore(): (Option[Expr], Option[Vector[Expr]]) = {
+    private def explore(maxChecks: Int = Int.MaxValue): (Option[Expr], Option[Vector[Expr]]) = {
         val parent : mutable.HashMap[Expr,Expr]= mutable.HashMap()
         val level : mutable.HashMap[Expr, Int] = mutable.HashMap(core -> 0)
         toCheck.enqueue((core.depth, core))
         while (toCheck.nonEmpty) {
             val curr = toCheck.dequeue()._2
             checks += 1
+            if (checks >= maxChecks) {
+                println(s"Timeout at $checks nodes explored, probably unknown")
+                return (None, None)
+            }
             //if (!seen.contains(curr)) {
                 seen.add(curr)
                 maxDepth = if (maxDepth >= curr.depth) maxDepth else curr.depth
@@ -46,10 +51,10 @@ class Simplifier(core: Expr,
                 }
                 val nextLevel = level(curr) + 1
                 genAdj(curr).foreach(v => {
-                    if (v.depth >= 10 || (level.keySet contains v)) {
+                    if (v.depth >= DEFAULT_MAX_DEPTH || (level.keySet contains v)) {
                         skips += 1
                     } else {
-                        toCheck.enqueue((v.depth * 3 + nextLevel * 2, v))
+                        toCheck.enqueue((v.depth * 4 + nextLevel * 1, v))
                         parent(v) = curr
                         level(v) = nextLevel
                     }
@@ -60,7 +65,7 @@ class Simplifier(core: Expr,
         }
         (None, None)// not found
     }
-    private val (ans, path) = explore()
+    private val (ans, path) = explore(maxChecks = DEFAULT_EXPLORATION_LIMIT)
 
     private def genAdj(ex: Expr): Set[Expr] = {
         genDirectTransforms(ex) | genRecTransforms(ex)
