@@ -10,6 +10,8 @@ class SimplifierSpec extends FlatSpec with Matchers {
     "A Simplifier" should "find an equivalent version for verbatim identities" in {
         new Simplifier(Add(Pow(sin,two), Pow(cos,two))).getSimplified should be (Some(one))
         new Simplifier(Div(sin, cos)).getSimplified should be (Some(tan))
+        new Simplifier(Div(one, cos)).getSimplified should be (Some(sec))
+        new Simplifier(Div(one, sin)).getSimplified should be (Some(csc))
     }
 
     it should "have getSimplified return None for things have no simpler form found" in {

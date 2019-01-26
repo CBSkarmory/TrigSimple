@@ -123,5 +123,16 @@ object Rules {
         case `tan` => Some(Div(`sin`,`cos`))
         case _ => None
     }}
-
+    // 1 / sin = csc
+    transforms :+= {x: Expr => x match {
+        case Div(`one`,`sin`) => Some(`csc`)
+        case `csc` => Some(Div(`one`,`sin`))
+        case _ => None
+    }}
+    // 1 / cos = sec
+    transforms :+= {x: Expr => x match {
+        case Div(`one`,`cos`) => Some(`sec`)
+        case `sec` => Some(Div(`one`,`cos`))
+        case _ => None
+    }}
 }
