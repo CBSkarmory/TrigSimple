@@ -16,14 +16,21 @@ class Simplifier(core: Expr,
     def getSimplified: Option[Expr] = this.ans
     def getWork: Option[Vector[Expr]] = this.path
 
+    var checks = 0
+    var skips = 0
+    var maxDepth = core.depth
+
     private def explore(): (Option[Expr], Option[Vector[Expr]]) = {
         val parent : mutable.HashMap[Expr,Expr]= mutable.HashMap()
         val level : mutable.HashMap[Expr, Int] = mutable.HashMap(core -> 0)
         toCheck.enqueue(core)
         while (toCheck.nonEmpty) {
             val curr = toCheck.dequeue()
+            checks += 1 // TODO
             if (!seen.contains(curr)) {
                 seen.add(curr)
+                maxDepth = if (maxDepth >= curr.depth) maxDepth else {println(s"md: ${curr.depth}"); curr.depth} // TODO
+
                 if (targets.contains(curr)) {
                     var trace = Vector(curr)
                     var ptr = curr
@@ -38,15 +45,21 @@ class Simplifier(core: Expr,
                     parent(v) = curr
                     level(v) = level(parent(v)) + 1
                 })
+            } else {
+                skips += 1 // TODO
             }
             // go to next iteration
+
         }
         (None, None)// not found
     }
     private val (ans, path) = explore()
+    println(s"$checks steps")
+    println(s"$skips skips")
+    println(s"${seen.size} seen")
 
     private def genAdj(ex: Expr): Set[Expr] = {
-        (genDirectTransforms(ex) | genRecTransforms(ex)) -- seen
+        genDirectTransforms(ex) | genRecTransforms(ex)
     }
 
     private def genDirectTransforms(ex: Expr): Set[Expr] = {
