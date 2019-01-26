@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor
 import scala.collection.mutable
 
 
+
 class Simplifier(core: Expr,
                  transforms: Vector[Expr => Option[Expr]] = Rules.transforms,
                  targets: scala.collection.immutable.Set[Expr] = Rules.targets) {
@@ -31,7 +32,7 @@ class Simplifier(core: Expr,
                 seen.add(curr)
                 maxDepth = if (maxDepth >= curr.depth) maxDepth else {println(s"md: ${curr.depth}"); curr.depth} // TODO
 
-                if (targets.contains(curr)) {
+                if (targets.contains(curr) || curr.isInstanceOf[IntExpr]) {
                     var trace = Vector(curr)
                     var ptr = curr
                     while (parent contains ptr) {
@@ -54,9 +55,11 @@ class Simplifier(core: Expr,
         (None, None)// not found
     }
     private val (ans, path) = explore()
-    println(s"$checks steps")
-    println(s"$skips skips")
-    println(s"${seen.size} seen")
+    if (true) {
+        println(s"$checks checks")
+        println(s"$skips skips")
+        //println(s"${seen.size} seen")
+    }
 
     private def genAdj(ex: Expr): Set[Expr] = {
         genDirectTransforms(ex) | genRecTransforms(ex)

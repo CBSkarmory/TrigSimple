@@ -12,7 +12,7 @@ object Rules {
     targets ++= basicFns
     targets ++= basicFns.map(Pow(_,two)) // f^2
     targets ++= basicFns.map(Mult(two,_)) // 2f
-    targets ++= (0 until 65).map(IntExpr)
+    //targets ++= (-64 until 65).map(IntExpr)
 
     var transforms: Vector[Expr => Option[Expr]] = Vector()
 
@@ -49,6 +49,16 @@ object Rules {
         case Add(`zero`, ex) => Some(ex)
         case _ => None
     }}
+    // Sub Identity
+    transforms :+= {x: Expr => x match {
+        case Sub(ex, `zero`) => Some(ex)
+        case _ => None
+    }}
+    // Sub Inverse
+    transforms :+= {x: Expr => x match {
+        case Sub(ex1, ex2) if ex1 == ex2=> Some(zero)
+        case _ => None
+    }}
     // Additive Inverse
     transforms :+= {x: Expr => x match {
         case Add(ex1, Mult(`negOne`, ex2)) if ex1 == ex2 => Some(zero)
@@ -62,6 +72,16 @@ object Rules {
     // Multiplicative Inverse
     transforms :+= {x: Expr => x match {
         case Mult(ex1, Div(`one`,ex2)) if ex1 == ex2 => Some(one)
+        case _ => None
+    }}
+    // Div Identity
+    transforms :+= {x: Expr => x match {
+        case Div(ex, `one`) => Some(ex)
+        case _ => None
+    }}
+    // Div Inverse
+    transforms :+= {x: Expr => x match {
+        case Div(ex1, ex2) if ex1 == ex2=> Some(one)
         case _ => None
     }}
 
@@ -82,7 +102,9 @@ object Rules {
     // a * (x/b) = (a/b) * x
     // (a * x) / b = (a/b) * x
     transforms :+= {x: Expr => x match {
+        case Mult(expr1, Div(ex, expr2)) if expr1 == expr2 => Some(ex)
         case Mult(IntExpr(a), Div(ex, IntExpr(b))) if divides(a,b) => Some(Mult(IntExpr(a/b), ex))
+        case Div(Mult(expr1, ex), expr2) if expr1 == expr2 => Some(ex)
         case Div(Mult(IntExpr(a), ex), IntExpr(b)) if divides(a,b) => Some(Mult(IntExpr(a/b), ex))
         case _ => None
     }}
@@ -90,8 +112,23 @@ object Rules {
     // (x - y) = -(y - x)
     // a(x - y) = -a(y - x)
     transforms :+= {x: Expr => x match {
+        case Mult(`negOne`, Sub(e1, e2)) => Some(Sub(e2, e1))
         case Sub(e1, e2) => Some(Mult(IntExpr(-1), Sub(e2, e1)))
         case Mult(IntExpr(a), Sub(e1, e2)) => Some(Mult(IntExpr(-a), Sub(e2, e1)))
+        case _ => None
+    }}
+    // a / (x / y) = (ay / x)
+    transforms :+= {x: Expr => x match {
+        case Div(numerator, Div(a, b)) => Some(Div(Mult(numerator, b),a))
+        case Div(Mult(num1, num2), den) => Some(Div(num1, Div(den, num2)))
+        case Div(num, den) => Some(Div(`one`, Div(den, num)))
+        case _ => None
+    }}
+
+    // multiplying fractions
+    transforms :+= {x: Expr => x match {
+        case Mult(Div(num1, den1), Div(num2, den2)) => Some(Div(Mult(num1, num2), Mult(den1, den2)))
+        case Mult(ex1, Div(num, den)) => Some(Div(Mult(ex1, num), den))
         case _ => None
     }}
 
@@ -133,6 +170,12 @@ object Rules {
     transforms :+= {x: Expr => x match {
         case Div(`one`,`cos`) => Some(`sec`)
         case `sec` => Some(Div(`one`,`cos`))
+        case _ => None
+    }}
+    // 1 / tan = cot
+    transforms :+= {x: Expr => x match {
+        case Div(`one`,`tan`) => Some(`cot`)
+        case `cot` => Some(Div(`one`,`tan`))
         case _ => None
     }}
 }

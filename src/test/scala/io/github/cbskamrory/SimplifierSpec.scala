@@ -12,6 +12,7 @@ class SimplifierSpec extends FlatSpec with Matchers {
         new Simplifier(Div(sin, cos)).getSimplified should be (Some(tan))
         new Simplifier(Div(one, cos)).getSimplified should be (Some(sec))
         new Simplifier(Div(one, sin)).getSimplified should be (Some(csc))
+        new Simplifier(Div(one, tan)).getSimplified should be (Some(cot))
     }
 
     it should "have getSimplified return None for things have no simpler form found" in {
@@ -54,6 +55,24 @@ class SimplifierSpec extends FlatSpec with Matchers {
         new Simplifier(Add(sec,sec)).getSimplified should be (Some(Mult(two, sec)))
         new Simplifier(Add(tan,tan)).getSimplified should be (Some(Mult(two, tan)))
         new Simplifier(Add(cot,cot)).getSimplified should be (Some(Mult(two, cot)))
+    }
+
+    it should "be able to cancel fn and 1/fn" in {
+        new Simplifier(Mult(sin, csc)).getSimplified should be (Some(one))
+        new Simplifier(Mult(cos, sec)).getSimplified should be (Some(one))
+        new Simplifier(Mult(tan, cot)).getSimplified should be (Some(one))
+    }
+
+    it should "be able to move a denominator's denominator to the numerator" in {
+        new Simplifier(Div(sin, csc)).getSimplified should be (Some(Pow(sin,two)))
+        new Simplifier(Div(cos, sec)).getSimplified should be (Some(Pow(cos,two)))
+        new Simplifier(Div(tan, cot)).getSimplified should be (Some(Pow(tan,two)))
+    }
+
+    it should "be able to cancel out the same thing in the numerator and denominator" in {
+        new Simplifier(Mult(Div(sin, cos), Div(cos, sin))).getSimplified should be (Some(one))
+        new Simplifier(Mult(Div(three, two), Div(two, three))).getSimplified should be (Some(one))
+        new Simplifier(Mult(Div(sec, tan), Div(tan, sec))).getSimplified should be (Some(one))
     }
 
     it should "simplify with as few steps as possible" in {
