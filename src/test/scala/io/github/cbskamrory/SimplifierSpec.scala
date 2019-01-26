@@ -25,7 +25,8 @@ class SimplifierSpec extends FlatSpec with Matchers {
     it should "be able evaluate addition and multiplication of ints (nested)" in {
         new Simplifier(Mult(two, Add(one, one))).getSimplified should be (Some(IntExpr(4)))
         new Simplifier(Add(one, Add(one,Add(one,Add(one, one))))).getSimplified should be (Some(IntExpr(5)))
-        //new Simplifier(Mult(two, Mult(two,Mult(two,Mult(two, two))))).getSimplified should be (Some(IntExpr(32)))
+        // TODO this takes a while to run
+        new Simplifier(Mult(two, Mult(two,Mult(two,Mult(two, two))))).getSimplified should be (Some(IntExpr(32)))
     }
 
     it should "use commutativity of addition" in {

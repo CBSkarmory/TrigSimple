@@ -15,6 +15,5 @@ libraryDependencies ++= {
 }
 
 coverageEnabled.in(Test, test) := true
-testOptions in Test += Tests.Argument("-P")
 
 mainClass in Compile := Some("io.github.cbskarmory.InputReader")
