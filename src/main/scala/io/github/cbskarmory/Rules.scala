@@ -1,13 +1,11 @@
 package io.github.cbskarmory
 
-import io.github.cbskarmory.Utility.divides
+import io.github.cbskarmory.Utility._
 
 import scala.collection.immutable.HashSet
 
 object Rules {
 
-    private val (sin, csc, cos, sec, tan, cot) = (Sin(), Csc(), Cos(), Sec(), Tan(), Cot())
-    private val (negOne, zero, one, two) = (IntExpr(-1), IntExpr(0), IntExpr(1), IntExpr(2))
     private val basicFns = Vector(sin, csc, cos, sec, tan, cot)
 
     var targets : Set[Expr] = new HashSet[Expr]

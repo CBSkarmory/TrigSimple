@@ -1,12 +1,12 @@
 package io.github.cbskamrory
 
 import io.github.cbskarmory.Parser.parseExpr
+import io.github.cbskarmory.Utility._
 import io.github.cbskarmory._
 import org.scalatest._
 
 class ParserSpec extends FlatSpec with Matchers {
 
-    private val (sin, csc, cos, sec, tan, cot) = (Sin(), Csc(), Cos(), Sec(), Tan(), Cot())
     private val (sin_t, csc_t, cos_t, sec_t, tan_t, cot_t) = (
             TokSin(), TokCsc(), TokCos(), TokSec(), TokTan(), TokCot()
     )

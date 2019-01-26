@@ -1,14 +1,12 @@
 package io.github.cbskamrory
 
+import io.github.cbskarmory.Utility._
 import io.github.cbskarmory.{Simplifier, _}
 import org.scalatest._
 
 
 class SimplifierSpec extends FlatSpec with Matchers {
 
-    private val (sin, csc, cos, sec, tan, cot) = (Sin(), Csc(), Cos(), Sec(), Tan(), Cot())
-    private val (one, two) = (IntExpr(1), IntExpr(2))
-    
     "A Simplifier" should "find an equivalent version for verbatim identities" in {
         new Simplifier(Add(Pow(sin,two), Pow(cos,two))).getSimplified should be (Some(one))
         new Simplifier(Div(sin, cos)).getSimplified should be (Some(tan))
@@ -36,6 +34,14 @@ class SimplifierSpec extends FlatSpec with Matchers {
 
     it should "use associativity of addition" in {
         new Simplifier(Add(Pow(sin,two), Add(Pow(cos,two), one))).getSimplified should be (Some(two))
+    }
+
+    it should "use additive identity" in {
+        new Simplifier(Add(zero, two)).getSimplified should be (Some(two))
+    }
+
+    it should "use additive inverse" in {
+        new Simplifier(Add(one, negOne)).getSimplified should be (Some(zero))
     }
 
     it should "be able to add 2 of the same trig function into 2 * that function" in {
