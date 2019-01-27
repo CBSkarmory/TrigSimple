@@ -4,7 +4,6 @@ import io.github.cbskarmory.Utility._
 import io.github.cbskarmory.{Simplifier, _}
 import org.scalatest._
 
-
 class SimplifierSpec extends FlatSpec with Matchers {
 
     "A Simplifier" should "find an equivalent version for verbatim identities" in {

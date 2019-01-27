@@ -1,4 +1,4 @@
-name := "trig_simplify"
+name := "TrigSimple"
 
 version := "v0.2-beta"
 

@@ -5,7 +5,7 @@
 
 Simplifies trigonometric expressions automatically with state space search AI
 
-Shows work with fewest possible number of steps
+Shows work from start to simplified expression
 
 ## Build Instructions
 Use `sbt assembly` to generate a standalone jar file
@@ -13,3 +13,27 @@ Use `sbt assembly` to generate a standalone jar file
 Use `sbt run` to run with [sbt](https://www.scala-sbt.org/)
 
 Use `sbt test` to run tests
+
+## Example Usage
+```
+[TrigSimple v0.2-beta]
+Type 'exit' to exit or an expression to simplify. Ctrl-C to cancel
+> tan^2 / (tan^2 + 1)
+--------
+Parsed: ((tan^2) / ((tan^2) + 1))
+768 nodes explored
+12 steps
+--------
+((tan^2) / ((tan^2) + 1))
+((tan^2) / (((sin / cos)^2) + 1))
+((tan^2) / (((sin^2) / (cos^2)) + 1))
+((tan^2) / (((sin^2) / (cos^2)) + ((cos^2) / (cos^2))))
+((tan^2) / (((sin^2) + (cos^2)) / (cos^2)))
+(((tan^2) * (cos^2)) / ((sin^2) + (cos^2)))
+(((tan^2) * (cos^2)) / 1)
+((tan^2) * (cos^2))
+((cos^2) * (tan^2))
+((cos^2) * ((sin / cos)^2))
+((cos^2) * ((sin^2) / (cos^2)))
+(sin^2)
+```

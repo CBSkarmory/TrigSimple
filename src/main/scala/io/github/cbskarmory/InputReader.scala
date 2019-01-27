@@ -2,19 +2,20 @@ package io.github.cbskarmory
 
 import io.github.cbskarmory.Lexer.tokenize
 import io.github.cbskarmory.Parser.parseExpr
+import io.github.cbskarmory.Utility._
 
 import scala.annotation.tailrec
-import scala.io.StdIn.readLine
 
 // $COVERAGE-OFF$
 object InputReader {
+
     def main(args: Array[String]): Unit = {
 
-        println("Type 'exit' to exit or an expression to simplify. Ctrl-C to cancel")
+        printIntro()
 
         @tailrec
         def readInput(): Unit = {
-            val ln = readLine().toLowerCase()
+            val ln = readLn().toLowerCase()
             if (ln == "exit") {
                 return
             }
