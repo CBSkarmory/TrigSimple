@@ -54,7 +54,7 @@ class Simplifier(core: Expr,
                     if (v.depth >= DEFAULT_MAX_DEPTH || (level.keySet contains v)) {
                         skips += 1
                     } else {
-                        toCheck.enqueue((v.depth * 4 + nextLevel * 1, v))
+                        toCheck.enqueue((v.depth * 8 + nextLevel * 1, v))
                         parent(v) = curr
                         level(v) = nextLevel
                     }

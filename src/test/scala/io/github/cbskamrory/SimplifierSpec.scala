@@ -37,14 +37,21 @@ class SimplifierSpec extends FlatSpec with Matchers {
 
     it should "use associativity of addition" in {
         new Simplifier(Add(Pow(sin,two), Add(Pow(cos,two), one))).getSimplified should be (Some(two))
+        new Simplifier(Sub(Add(sin, cos), cos)).getSimplified should be (Some(sin))
     }
 
     it should "use additive identity" in {
         new Simplifier(Add(zero, two)).getSimplified should be (Some(two))
+        new Simplifier(Add(zero, Pow(sec, three))).getSimplified should be (Some(Pow(sec,three)))
     }
 
     it should "use additive inverse" in {
-        new Simplifier(Add(one, negOne)).getSimplified should be (Some(zero))
+        new Simplifier(Add(Pow(sin,two),Mult(negOne, Pow(sin, two)))).getSimplified should be (Some(zero))
+    }
+
+    it should "use subtractive identity" in {
+        new Simplifier(Sub(one, zero)).getSimplified should be (Some(one))
+        new Simplifier(Sub(Pow(sin,two),zero)).getSimplified should be (Some(Pow(sin,two)))
     }
 
     it should "be able to add 2 of the same trig function into 2 * that function" in {
@@ -84,10 +91,12 @@ class SimplifierSpec extends FlatSpec with Matchers {
     }
 
     it should "handle moderately complex identities on its own" in {
-        new Simplifier(Div(Pow(tan, two), Add(Pow(tan, two), one))).getSimplified should be (Some(Pow(sin, two)))
+        val s1 = new Simplifier(Div(Pow(tan, two), Add(Pow(tan, two), one)))
+        s1.getSimplified should be (Some(Pow(sin, two)))
+        s1.getWork.get.length should be (12)
     }
 
-    it should "simplify with as few steps as possible" in {
+    it should "simplify basic expressions with as few steps as possible" in {
         new Simplifier(Add(one, one)).getWork.get.size should be (2)
         new Simplifier(Mult(Add(one, one), two)).getWork.get.size should be (3)
         new Simplifier(Mult(two, Add(one, one))).getWork.get.size should be (3)

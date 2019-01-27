@@ -8,7 +8,7 @@ Simplifies trigonometric expressions automatically with state space search AI
 Shows work with fewest possible number of steps
 
 ## Build Instructions
-Use `sbt package` to generate a standalone jar file
+Use `sbt assembly` to generate a standalone jar file
 
 Use `sbt run` to run with [sbt](https://www.scala-sbt.org/)
 

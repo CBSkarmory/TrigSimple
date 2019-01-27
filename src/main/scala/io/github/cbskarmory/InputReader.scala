@@ -19,7 +19,9 @@ object InputReader {
                 return
             }
             try {
+                println("--------")
                 val exp = parseExpr(tokenize(ln.toList))
+                println(s"Parsed: $exp")
                 val simplifier = new Simplifier(exp)
                 val path = simplifier.getWork match {
                     case None => "unknown"
@@ -33,6 +35,7 @@ object InputReader {
 
             } catch {
                 case e: InterpreterError => println(e.toString)
+                case e: InterruptedException => println("<canceled>")
             }
             readInput()
         }
