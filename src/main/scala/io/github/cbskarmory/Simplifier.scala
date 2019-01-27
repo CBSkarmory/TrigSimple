@@ -5,7 +5,6 @@ import java.lang.reflect.Constructor
 import scala.collection.mutable
 
 
-
 class Simplifier(core: Expr,
                  transforms: Vector[Expr => Option[Expr]] = Rules.transforms,
                  targets: scala.collection.immutable.Set[Expr] = Rules.targets) {
@@ -14,11 +13,16 @@ class Simplifier(core: Expr,
     val DEFAULT_MAX_DEPTH: Int = 16
 
     val seen = new mutable.HashSet[Expr]()
-    private def cmp(tup: (Int, Expr)): Int = {-tup._1}
-    private val toCheck : mutable.PriorityQueue[(Int, Expr)]= mutable.PriorityQueue.empty(Ordering.by(cmp))
+
+    private def cmp(tup: (Int, Expr)): Int = {
+        -tup._1
+    }
+
+    private val toCheck: mutable.PriorityQueue[(Int, Expr)] = mutable.PriorityQueue.empty(Ordering.by(cmp))
     val this.transforms = transforms
 
     def getSimplified: Option[Expr] = this.ans
+
     def getWork: Option[Vector[Expr]] = this.path
 
     var checks = 0
@@ -26,8 +30,8 @@ class Simplifier(core: Expr,
     var maxDepth: Int = core.depth
 
     private def explore(maxChecks: Int = Int.MaxValue): (Option[Expr], Option[Vector[Expr]]) = {
-        val parent : mutable.HashMap[Expr,Expr]= mutable.HashMap()
-        val level : mutable.HashMap[Expr, Int] = mutable.HashMap(core -> 0)
+        val parent: mutable.HashMap[Expr, Expr] = mutable.HashMap()
+        val level: mutable.HashMap[Expr, Int] = mutable.HashMap(core -> 0)
         toCheck.enqueue((core.depth, core))
         while (toCheck.nonEmpty) {
             val curr = toCheck.dequeue()._2
@@ -37,34 +41,35 @@ class Simplifier(core: Expr,
                 return (None, None)
             }
             //if (!seen.contains(curr)) {
-                seen.add(curr)
-                maxDepth = if (maxDepth >= curr.depth) maxDepth else curr.depth
+            seen.add(curr)
+            maxDepth = if (maxDepth >= curr.depth) maxDepth else curr.depth
 
-                if (targets.contains(curr) || curr.isInstanceOf[IntExpr]) {
-                    var trace = Vector(curr)
-                    var ptr = curr
-                    while (parent contains ptr) {
-                        ptr = parent(ptr)
-                         trace :+= ptr
-                    }
-                    return (Some(curr), Some(trace.reverse))
+            if (targets.contains(curr) || curr.isInstanceOf[IntExpr]) {
+                var trace = Vector(curr)
+                var ptr = curr
+                while (parent contains ptr) {
+                    ptr = parent(ptr)
+                    trace :+= ptr
                 }
-                val nextLevel = level(curr) + 1
-                genAdj(curr).foreach(v => {
-                    if (v.depth >= DEFAULT_MAX_DEPTH || (level.keySet contains v)) {
-                        skips += 1
-                    } else {
-                        toCheck.enqueue((v.depth * 8 + nextLevel * 1, v))
-                        parent(v) = curr
-                        level(v) = nextLevel
-                    }
-                })
+                return (Some(curr), Some(trace.reverse))
+            }
+            val nextLevel = level(curr) + 1
+            genAdj(curr).foreach(v => {
+                if (v.depth >= DEFAULT_MAX_DEPTH || (level.keySet contains v)) {
+                    skips += 1
+                } else {
+                    toCheck.enqueue((v.depth * 8 + nextLevel * 1, v))
+                    parent(v) = curr
+                    level(v) = nextLevel
+                }
+            })
             //}
             // go to next iteration
 
         }
-        (None, None)// not found
+        (None, None) // not found
     }
+
     private val (ans, path) = explore(maxChecks = DEFAULT_EXPLORATION_LIMIT)
 
     private def genAdj(ex: Expr): Set[Expr] = {

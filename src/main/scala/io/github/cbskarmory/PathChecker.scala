@@ -26,10 +26,10 @@ object PathChecker {
                 val targetExpr = parseExpr(tokenize(ln2.toList))
                 println(s"Parsed: $targetExpr")
 
-                val simplifier = new Simplifier(core=exp, targets=Set(targetExpr))
+                val simplifier = new Simplifier(core = exp, targets = Set(targetExpr))
                 val path = simplifier.getWork match {
                     case None => "not reachable"
-                    case Some(p) => p.map(_.toString).reduce((a,b) => a + "\n" + b)
+                    case Some(p) => p.map(_.toString).reduce((a, b) => a + "\n" + b)
                 }
                 println(s"${simplifier.checks} nodes explored")
                 println(s"${simplifier.getWork.getOrElse(Vector()).size} steps\n--------")
@@ -41,7 +41,9 @@ object PathChecker {
             }
             readInput()
         }
+
         readInput()
     }
 }
+
 // $COVERAGE-ON$

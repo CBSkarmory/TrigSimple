@@ -88,8 +88,10 @@ object Parser {
         }
     }
 }
-class InterpreterError(msg: String) extends IllegalArgumentException (msg){
+
+class InterpreterError(msg: String) extends IllegalArgumentException(msg) {
     val this.msg = msg
+
     override def toString: String = msg
 }
 

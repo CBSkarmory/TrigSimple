@@ -18,12 +18,13 @@ Use `sbt test` to run tests
 ```
 [TrigSimple v0.2-beta]
 Type 'exit' to exit or an expression to simplify. Ctrl-C to cancel
-> tan^2 / (tan^2 + 1)
---------
+----------------
+> tan ^ 2 / (tan^2 + 1)
+----------------
 Parsed: ((tan^2) / ((tan^2) + 1))
 768 nodes explored
 12 steps
---------
+----------------
 ((tan^2) / ((tan^2) + 1))
 ((tan^2) / (((sin / cos)^2) + 1))
 ((tan^2) / (((sin^2) / (cos^2)) + 1))
@@ -36,4 +37,22 @@ Parsed: ((tan^2) / ((tan^2) + 1))
 ((cos^2) * ((sin / cos)^2))
 ((cos^2) * ((sin^2) / (cos^2)))
 (sin^2)
+----------------
+> tan * sin + cos
+----------------
+Parsed: ((tan * sin) + cos)
+23 nodes explored
+9 steps
+----------------
+((tan * sin) + cos)
+((sin * tan) + cos)
+((sin * (sin / cos)) + cos)
+(((sin * sin) / cos) + cos)
+(((sin^2) / cos) + cos)
+(((sin^2) + (cos * cos)) / cos)
+(((sin^2) + (cos^2)) / cos)
+(1 / cos)
+sec
+----------------
+> exit
 ```
