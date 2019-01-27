@@ -7,10 +7,10 @@ import scala.annotation.tailrec
 import scala.io.StdIn.readLine
 
 // $COVERAGE-OFF$
-object InputReader {
+object PathChecker {
     def main(args: Array[String]): Unit = {
 
-        println("Type 'exit' to exit or an expression to simplify. Ctrl-C to cancel")
+        println("Type start expression then target expr. Ctrl-C to cancel")
 
         @tailrec
         def readInput(): Unit = {
@@ -19,12 +19,16 @@ object InputReader {
                 return
             }
             try {
-                println("--------")
                 val exp = parseExpr(tokenize(ln.toList))
-                println(s"Parsed: $exp")
-                val simplifier = new Simplifier(exp)
+                println("--------")
+                println(s"Parsed: $exp, enter target expression:")
+                val ln2 = readLine().toLowerCase()
+                val targetExpr = parseExpr(tokenize(ln2.toList))
+                println(s"Parsed: $targetExpr")
+
+                val simplifier = new Simplifier(core=exp, targets=Set(targetExpr))
                 val path = simplifier.getWork match {
-                    case None => "unknown"
+                    case None => "not reachable"
                     case Some(p) => p.map(_.toString).reduce((a,b) => a + "\n" + b)
                 }
                 println(s"${simplifier.checks} nodes explored")
@@ -40,4 +44,4 @@ object InputReader {
         readInput()
     }
 }
-// $COVERAGE_ON$
+// $COVERAGE-ON$
