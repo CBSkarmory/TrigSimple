@@ -2,6 +2,8 @@ package io.github.cbskarmory
 
 import java.lang.reflect.Constructor
 
+import io.github.cbskarmory.Utility._
+
 import scala.collection.mutable
 
 
@@ -9,8 +11,9 @@ class Simplifier(core: Expr,
                  transforms: Vector[Expr => Option[Expr]] = Rules.transforms,
                  targets: scala.collection.immutable.Set[Expr] = Rules.targets) {
 
-    val DEFAULT_EXPLORATION_LIMIT: Int = 5e4.asInstanceOf[Int]
+    val DEFAULT_EXPLORATION_LIMIT: Int = 1e4.asInstanceOf[Int]
     val DEFAULT_MAX_DEPTH: Int = 16
+    val ENABLE_SHOW_TIME_MS = true
 
     val seen = new mutable.HashSet[Expr]()
 
@@ -58,7 +61,7 @@ class Simplifier(core: Expr,
                 if (v.depth >= DEFAULT_MAX_DEPTH || (level.keySet contains v)) {
                     skips += 1
                 } else {
-                    toCheck.enqueue((v.depth * 8 + nextLevel * 1, v))
+                    toCheck.enqueue((v.depth * 2 + nextLevel * 1, v))
                     parent(v) = curr
                     level(v) = nextLevel
                 }
@@ -70,7 +73,10 @@ class Simplifier(core: Expr,
         (None, None) // not found
     }
 
-    private val (ans, path) = explore(maxChecks = DEFAULT_EXPLORATION_LIMIT)
+    private val (ans, path) = if (ENABLE_SHOW_TIME_MS) time {
+        explore(maxChecks = DEFAULT_EXPLORATION_LIMIT)
+    } else
+        explore(maxChecks = DEFAULT_EXPLORATION_LIMIT)
 
     private def genAdj(ex: Expr): Set[Expr] = {
         genDirectTransforms(ex) | genRecTransforms(ex)
