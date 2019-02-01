@@ -1,6 +1,13 @@
 language: scala
 scala:
-    - 2.12.8
+- 2.12.8
+
+cache:
+    - ~/.ivy2/cache
+
+os:
+    - linux
+    - osx
 
 script:
     - sbt clean coverage test coverageReport
