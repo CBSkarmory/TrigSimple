@@ -13,7 +13,7 @@ class Simplifier(core: Expr,
 
     val DEFAULT_EXPLORATION_LIMIT: Int = 1e4.asInstanceOf[Int]
     val DEFAULT_MAX_DEPTH: Int = 16
-    val ENABLE_SHOW_TIME_MS = true
+    val ENABLE_SHOW_TIME_MS = false
 
     val seen = new mutable.HashSet[Expr]()
 
@@ -23,7 +23,6 @@ class Simplifier(core: Expr,
 
     private val toCheck: mutable.PriorityQueue[(Int, Expr)] = mutable.PriorityQueue.empty(Ordering.by(cmp))
     val this.transforms = transforms
-
     def getSimplified: Option[Expr] = this.ans
 
     def getWork: Option[Vector[Expr]] = this.path
@@ -61,7 +60,7 @@ class Simplifier(core: Expr,
                 if (v.depth >= DEFAULT_MAX_DEPTH || (level.keySet contains v)) {
                     skips += 1
                 } else {
-                    toCheck.enqueue((v.depth * 2 + nextLevel * 1, v))
+                    toCheck.enqueue((v.depth * 4 + nextLevel * 1, v))
                     parent(v) = curr
                     level(v) = nextLevel
                 }
@@ -75,8 +74,9 @@ class Simplifier(core: Expr,
 
     private val (ans, path) = if (ENABLE_SHOW_TIME_MS) time {
         explore(maxChecks = DEFAULT_EXPLORATION_LIMIT)
-    } else
+    } else {
         explore(maxChecks = DEFAULT_EXPLORATION_LIMIT)
+    }
 
     private def genAdj(ex: Expr): Set[Expr] = {
         genDirectTransforms(ex) | genRecTransforms(ex)

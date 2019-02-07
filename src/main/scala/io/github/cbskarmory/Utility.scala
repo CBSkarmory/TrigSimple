@@ -21,8 +21,6 @@ object Utility {
                 s"\nType 'exit' to exit or an expression to simplify. Ctrl-C to cancel"
     }
 
-    // $COVERAGE_ON$
-
     def time[R](block: => R): R = {
         val t0 = System.nanoTime()
         val result = block // call-by-name
@@ -30,7 +28,7 @@ object Utility {
         println("Elapsed time: " + ((t1 - t0) / 1e6).asInstanceOf[Int] + "ms")
         result
     }
-
+    // $COVERAGE_ON$
 
     val (sin, csc, cos, sec, tan, cot) = (Sin(), Csc(), Cos(), Sec(), Tan(), Cot())
     val (negOne, zero, one, two, three, four) =
