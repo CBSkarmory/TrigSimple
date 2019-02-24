@@ -15,6 +15,7 @@ Use `sbt run` to run with [sbt](https://www.scala-sbt.org/)
 Use `sbt test` to run tests
 
 ## Example Usage
+### Simplifier
 ```
 [TrigSimple v0.2-beta]
 Type 'exit' to exit or an expression to simplify. Ctrl-C to cancel
@@ -55,4 +56,26 @@ Parsed: ((tan * sin) + cos)
 sec
 ----------------
 > exit
+```
+### Proof Solver
+```
+[TrigSimple v0.3-beta]
+Type 'exit' to exit or an expression to simplify. Ctrl-C to cancel
+[Identity proof solver]
+Enter starting expression:
+> sin * tan + cos
+--------
+Parsed: ((sin * tan) + cos), enter target expr or 'retry' to re-enter starting expr:
+> 1 / cos
+Parsed: (1 / cos)
+21 nodes explored
+7 steps
+--------
+((sin * tan) + cos)
+((sin * (sin / cos)) + cos)
+(((sin * sin) / cos) + cos)
+(((sin^2) / cos) + cos)
+(((sin^2) + (cos * cos)) / cos)
+(((sin^2) + (cos^2)) / cos)
+(1 / cos)
 ```
