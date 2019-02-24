@@ -7,11 +7,12 @@ import io.github.cbskarmory.Utility._
 import scala.annotation.tailrec
 
 // $COVERAGE-OFF$
-object InputReader {
+object MainSimplifier {
 
     def main(args: Array[String]): Unit = {
 
         printIntro()
+        println("[Trig expression simplifier]")
 
         @tailrec
         def readInput(): Unit = {

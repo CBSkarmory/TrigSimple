@@ -7,13 +7,15 @@ import io.github.cbskarmory.Utility._
 import scala.annotation.tailrec
 
 // $COVERAGE-OFF$
-object PathChecker {
+object MainProofSolver {
     def main(args: Array[String]): Unit = {
 
         printIntro()
+        println("[Identity proof solver]")
 
         @tailrec
         def readInput(): Unit = {
+            println("Enter starting expression:")
             val ln = readLn().toLowerCase()
             if (ln == "exit") {
                 return
@@ -21,8 +23,11 @@ object PathChecker {
             try {
                 val exp = parseExpr(tokenize(ln.toList))
                 println("--------")
-                println(s"Parsed: $exp, enter target expression:")
+                println(s"Parsed: $exp, enter target expr or 'retry' to re-enter starting expr:")
                 val ln2 = readLn().toLowerCase()
+                if ("retry" == ln2) {
+                    throw new InterruptedException()
+                }
                 val targetExpr = parseExpr(tokenize(ln2.toList))
                 println(s"Parsed: $targetExpr")
 
